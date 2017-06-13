@@ -5,8 +5,10 @@
 #
 FROM openshift/origin
 
-RUN INSTALL_PKGS="haproxy" && \
-    yum install -y $INSTALL_PKGS && \
+RUN INSTALL_PKGS="haproxy17u.x86_64" && \
+    wget https://centos7.iuscommunity.org/ius-release.rpm && \
+    rpm -Uvh ius-release.rpm && \
+    yum --disablerepo=origin-local-release install -y $INSTALL_PKGS && \
     rpm -V $INSTALL_PKGS && \
     yum clean all && \
     mkdir -p /var/lib/haproxy/router/{certs,cacerts} && \
@@ -21,7 +23,6 @@ COPY . /var/lib/haproxy/
 LABEL io.k8s.display-name="OpenShift Origin HAProxy Router" \
       io.k8s.description="This is a component of OpenShift Origin and contains an HAProxy instance that automatically exposes services within the cluster through routes, and offers TLS termination, reencryption, or SNI-passthrough on ports 80 and 443." \
       io.openshift.tags="openshift,router,haproxy"
-USER 1001
 EXPOSE 80 443
 WORKDIR /var/lib/haproxy/conf
 ENV TEMPLATE_FILE=/var/lib/haproxy/conf/haproxy-config.template \
